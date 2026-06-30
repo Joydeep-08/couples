@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>MarioLove 💕 Your Surprise</title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --red:#E52521;--blue:#049CD8;--gold:#FBD000;--green:#43B047;
+  --dark:#1A0A00;--sky:#87CEEB;--white:#fff;--pink:#FF6B9D;
+  --cream:#FFF8E7;--pipe:#3A7D00;--purple:#9B59B6;
+}
+html,body{height:100%;overflow:hidden}
+body{font-family:'Nunito',sans-serif;background:var(--sky);color:var(--dark)}
+
+/* ============ SHARED LAYOUT ============ */
+.scene{
+  position:fixed;inset:0;display:flex;flex-direction:column;
+  transition:opacity 0.5s ease,transform 0.5s ease;
+  overflow:hidden;
+}
+.scene.hidden{opacity:0;pointer-events:none;transform:scale(0.97)}
+
+/* TOP WATERMARK / BANNER */
+.top-bar{
+  flex-shrink:0;
+  background:var(--red);
+  border-bottom:4px solid var(--dark);
+  padding:10px 20px;
+  display:flex;align-items:center;justify-content:space-between;
+  box-shadow:0 4px 0 #8B0000;
+  z-index:100;
+}
+.top-bar .logo{
+  font-family:'Press Start 2P',monospace;
+  font-size:10px;color:var(--gold);
+  text-shadow:2px 2px 0 var(--dark);
+}
+.watermark-badge{
+  font-family:'Press Start 2P',monospace;font-size:6px;
+  color:var(--gold);background:rgba(0,0,0,0.4);
+  padding:5px 10px;border-radius:6px;border:2px solid var(--gold);
+}
+
+/* GROUND + CLOUDS shared */
+.sky-bg{
+  position:absolute;inset:0;overflow:hidden;z-index:0;
+  background:linear-gradient(180deg,#87CEEB 0%,#B0E0FF 100%);
+}
+.cloud-f{position:absolute;background:white;border-radius:50px;opacity:0.9}
+.cloud-f::before,.cloud-f::after{content:'';position:absolute;background:white;border-radius:50%}
+.ground-f{
+  position:absolute;bottom:0;left:0;width:100%;height:56px;
+  background:repeating-linear-gradient(90deg,var(--green) 0,var(--green) 48px,var(--pipe) 48px,var(--pipe) 52px);
+  border-top:6px solid var(--dark);z-index:2;
+}
+.ground-f::before{
+  content:'';position:absolute;top:-14px;left:0;width:100%;height:14px;
+  background:repeating-linear-gradient(90deg,#5BC23A 0,#5BC23A 48px,#3A7D00 48px,#3A7D00 52px);
+}
+.mario-walk{
+  position:absolute;bottom:56px;font-size:26px;z-index:3;
+  animation:walk 10s linear infinite;pointer-events:none;
+}
+@keyframes walk{0%{left:-50px}100%{left:110%}}
+
+/* CONTENT CENTER */
+.scene-content{
+  flex:1;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  position:relative;z-index:10;
+  padding:20px 16px 80px;
+  overflow:hidden;
+}
+
+/* ============ PAGE 1: PASSWORD ============ */
+#page1 .sky-bg{background:linear-gradient(180deg,#1a0a3a 0%,#4B1A8C 50%,#1a0a3a 100%)}
+.stars-bg span{
+  position:absolute;background:white;border-radius:50%;animation:twinkle 2s ease-in-out infinite;
+}
+@keyframes twinkle{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.2;transform:scale(0.6)}}
+
+.pwd-card{
+  background:var(--white);
+  border:5px solid var(--dark);
+  border-radius:16px;
+  box-shadow:8px 8px 0 var(--dark);
+  width:100%;max-width:380px;
+  overflow:hidden;
+}
+.pwd-card-header{
+  background:var(--red);padding:18px;text-align:center;
+  border-bottom:4px solid var(--dark);
+}
+.pwd-card-header h1{
+  font-family:'Press Start 2P',monospace;font-size:10px;color:var(--gold);
+  text-shadow:2px 2px 0 rgba(0,0,0,0.5);margin-bottom:6px;
+}
+.pwd-card-header p{font-size:11px;color:rgba(255,255,255,0.8)}
+
+.couple-frame{
+  padding:14px;border-bottom:4px solid var(--dark);
+  background:var(--cream);text-align:center;
+}
+.couple-img{
+  width:100%;max-height:150px;object-fit:cover;
+  border-radius:10px;border:4px solid var(--dark);
+  box-shadow:4px 4px 0 var(--dark);
+}
+.couple-placeholder{
+  width:100%;height:120px;background:var(--cream);
+  border:4px dashed var(--blue);border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:40px;
+}
+.receiver-tag{
+  margin-top:10px;font-family:'Press Start 2P',monospace;
+  font-size:8px;color:var(--red);
+}
+
+/* KEYPAD */
+.keypad-area{padding:18px}
+.pwd-input-display{
+  display:flex;gap:10px;justify-content:center;margin-bottom:16px;
+}
+.pwd-box{
+  width:48px;height:48px;border-radius:10px;
+  background:var(--cream);border:4px solid var(--dark);
+  box-shadow:3px 3px 0 var(--dark);
+  display:flex;align-items:center;justify-content:center;
+  font-size:24px;color:var(--dark);transition:all 0.2s;
+}
+.pwd-box.filled{background:var(--gold);}
+.pwd-box.filled::after{content:'★';font-size:22px}
+.pwd-box.shake{animation:shake 0.4s ease}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+
+.keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.key-btn{
+  background:var(--red);color:white;border:3px solid var(--dark);
+  border-radius:10px;padding:14px 8px;
+  font-family:'Press Start 2P',monospace;font-size:12px;
+  cursor:pointer;box-shadow:3px 3px 0 var(--dark);
+  transition:transform 0.1s,box-shadow 0.1s;text-align:center;
+  user-select:none;
+}
+.key-btn:active,.key-btn:hover{transform:translateY(-2px);background:var(--gold);color:var(--dark)}
+.key-btn.special{background:var(--blue)}
+.key-btn.del{background:#888}
+
+.error-msg{
+  text-align:center;font-family:'Press Start 2P',monospace;
+  font-size:8px;color:var(--red);margin-top:10px;min-height:18px;
+}
+
+/* ============ PAGE 2: BOUQUET ============ */
+#page2{background:linear-gradient(135deg,#FF9A9E 0%,#FAD0C4 50%,#FFD1DC 100%)}
+#page2 .sky-bg{background:linear-gradient(135deg,#FFCDD2 0%,#F8BBD9 60%,#FCE4EC 100%)}
+
+.bouquet-scene{
+  text-align:center;padding:10px;max-width:440px;width:100%;
+}
+.bouquet-title{
+  font-family:'Press Start 2P',monospace;font-size:11px;color:var(--red);
+  text-shadow:2px 2px 0 var(--dark);margin-bottom:20px;
+  animation:pulse-title 2s ease-in-out infinite;
+}
+@keyframes pulse-title{0%,100%{transform:scale(1)}50%{transform:scale(1.03)}}
+
+.bouquet-img-wrap{
+  position:relative;display:inline-block;margin-bottom:16px;
+  filter:drop-shadow(0 10px 30px rgba(255,105,135,0.5));
+}
+.bouquet-emoji-big{
+  font-size:clamp(80px,18vw,130px);
+  display:block;
+  animation:bouquetFloat 3s ease-in-out infinite;
+  cursor:pointer;
+  transition:transform 0.3s;
+}
+.bouquet-emoji-big:hover{transform:scale(1.1) rotate(5deg)}
+@keyframes bouquetFloat{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-16px) rotate(2deg)}}
+
+.flower-ring{
+  display:flex;justify-content:center;gap:8px;font-size:28px;
+  margin-bottom:12px;
+  animation:flowerSpin 4s linear infinite;
+}
+@keyframes flowerSpin{0%{letter-spacing:8px}50%{letter-spacing:16px}100%{letter-spacing:8px}}
+
+.love-msg-card{
+  background:white;border:4px solid var(--dark);border-radius:14px;
+  padding:16px 20px;box-shadow:5px 5px 0 var(--dark);
+  margin-bottom:18px;
+}
+.love-msg-card p{
+  font-size:13px;color:var(--dark);line-height:1.7;font-weight:700;
+}
+.love-msg-card .from{
+  font-family:'Press Start 2P',monospace;font-size:7px;
+  color:var(--red);margin-top:8px;
+}
+
+/* Falling petals */
+.petal{
+  position:absolute;font-size:20px;
+  animation:petalFall linear infinite;
+  pointer-events:none;
+}
+@keyframes petalFall{
+  0%{transform:translateY(-30px) rotate(0deg);opacity:1}
+  100%{transform:translateY(100vh) rotate(720deg);opacity:0}
+}
+
+/* ============ PAGE 3: BALLOONS ============ */
+#page3 .sky-bg{background:linear-gradient(180deg,#C9F7FF 0%,#87CEEB 100%)}
+
+.balloons-scene{text-align:center;width:100%;max-width:500px}
+.balloons-title{
+  font-family:'Press Start 2P',monospace;font-size:10px;color:var(--dark);
+  margin-bottom:24px;text-shadow:2px 2px 0 rgba(0,0,0,0.15);
+}
+.balloons-row{
+  display:flex;gap:clamp(20px,5vw,40px);justify-content:center;align-items:flex-end;
+  margin-bottom:20px;
+}
+.balloon-wrap{
+  display:flex;flex-direction:column;align-items:center;
+  cursor:pointer;position:relative;
+}
+.balloon{
+  width:clamp(70px,16vw,100px);
+  height:clamp(88px,20vw,125px);
+  border-radius:50% 50% 50% 50% / 55% 55% 45% 45%;
+  border:4px solid var(--dark);
+  position:relative;cursor:pointer;
+  box-shadow:inset -8px -8px 0 rgba(0,0,0,0.12), inset 4px 4px 0 rgba(255,255,255,0.4);
+  transition:transform 0.2s;
+  animation:balloonBob 2s ease-in-out infinite;
+}
+.balloon:hover{transform:scale(1.1)}
+.balloon::after{
+  content:'';position:absolute;bottom:-16px;left:50%;transform:translateX(-50%);
+  width:3px;height:50px;background:var(--dark);
+}
+.balloon::before{
+  content:'★';position:absolute;top:30%;left:50%;transform:translate(-50%,-50%);
+  font-size:22px;opacity:0.3;
+}
+.balloon-1{background:linear-gradient(135deg,#FF6B9D,#E52521);animation-delay:0s}
+.balloon-2{background:linear-gradient(135deg,#049CD8,#0074AB);animation-delay:0.3s}
+.balloon-3{background:linear-gradient(135deg,#FBD000,#E8A000);animation-delay:0.6s}
+@keyframes balloonBob{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-14px) rotate(2deg)}}
+
+.balloon.popped{
+  animation:pop 0.4s ease forwards!important;
+}
+@keyframes pop{
+  0%{transform:scale(1);opacity:1}
+  50%{transform:scale(1.4);opacity:0.6}
+  100%{transform:scale(0);opacity:0}
+}
+
+/* GIF POLAROID */
+.polaroid-overlay{
+  display:none;position:fixed;inset:0;z-index:50;
+  background:rgba(0,0,0,0.8);
+  align-items:center;justify-content:center;
+  padding:20px;
+}
+.polaroid-overlay.open{display:flex}
+.polaroid{
+  background:white;padding:14px 14px 50px;
+  border:4px solid var(--dark);box-shadow:8px 8px 0 var(--dark);
+  border-radius:4px;max-width:300px;width:100%;
+  text-align:center;position:relative;
+  animation:polaroidIn 0.4s cubic-bezier(0.34,1.56,0.64,1);
+}
+@keyframes polaroidIn{from{transform:scale(0.4) rotate(-10deg);opacity:0}to{transform:scale(1) rotate(-1deg);opacity:1}}
+.polaroid img{
+  width:100%;border-radius:2px;margin-bottom:12px;
+  border:2px solid var(--dark);
+}
+.polaroid .message{
+  font-family:'Nunito',sans-serif;font-size:13px;font-weight:800;
+  color:var(--dark);line-height:1.6;
+  font-style:italic;
+}
+.polaroid .close-pol{
+  position:absolute;top:-14px;right:-14px;
+  background:var(--red);color:white;border:3px solid var(--dark);
+  border-radius:50%;width:32px;height:32px;cursor:pointer;
+  font-family:'Press Start 2P',monospace;font-size:8px;
+  display:flex;align-items:center;justify-content:center;
+}
+.polaroid .stamp{
+  font-family:'Press Start 2P',monospace;font-size:6px;color:var(--red);
+  margin-top:8px;
+}
+
+/* ============ PAGE 4: CAKE ============ */
+#page4 .sky-bg{background:linear-gradient(180deg,#1a0a3a 0%,#2d1b69 50%,#4a0080 100%)}
+
+.cake-scene{text-align:center;max-width:440px;width:100%}
+.cake-title{
+  font-family:'Press Start 2P',monospace;font-size:9px;color:var(--gold);
+  text-shadow:2px 2px 0 var(--dark);margin-bottom:20px;
+}
+.cake-wrap{position:relative;display:inline-block;cursor:pointer}
+.cake-emoji{
+  font-size:clamp(90px,20vw,140px);
+  display:block;
+  transition:transform 0.3s;
+  filter:drop-shadow(0 0 30px rgba(251,208,0,0.6));
+}
+.blow-btn{
+  display:inline-flex;align-items:center;gap:8px;
+  background:var(--gold);color:var(--dark);
+  border:4px solid var(--dark);border-radius:12px;
+  font-family:'Press Start 2P',monospace;font-size:9px;
+  padding:14px 24px;cursor:pointer;
+  box-shadow:5px 5px 0 var(--dark);
+  transition:transform 0.1s,box-shadow 0.1s;
+  margin-top:16px;animation:blowPulse 1.5s ease-in-out infinite;
+}
+.blow-btn:hover{transform:translateY(-3px);box-shadow:5px 8px 0 var(--dark)}
+@keyframes blowPulse{0%,100%{box-shadow:5px 5px 0 var(--dark)}50%{box-shadow:5px 5px 0 var(--red),0 0 20px rgba(251,208,0,0.4)}}
+
+.wish-input-wrap{
+  margin-top:16px;display:none;
+}
+.wish-input{
+  width:100%;border:4px solid var(--dark);border-radius:10px;
+  padding:12px 16px;font-size:14px;font-family:'Nunito',sans-serif;
+  background:var(--cream);box-shadow:4px 4px 0 var(--dark);
+  outline:none;margin-bottom:12px;
+}
+.wish-submit{
+  background:var(--red);color:white;border:4px solid var(--dark);
+  border-radius:10px;font-family:'Press Start 2P',monospace;font-size:8px;
+  padding:12px 20px;cursor:pointer;box-shadow:4px 4px 0 var(--dark);
+}
+.fireworks{
+  position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:1;
+}
+.spark{
+  position:absolute;width:6px;height:6px;border-radius:50%;
+  animation:sparkFly 1.5s ease-out forwards;
+}
+@keyframes sparkFly{
+  0%{transform:translate(0,0) scale(1);opacity:1}
+  100%{transform:translate(var(--dx),var(--dy)) scale(0);opacity:0}
+}
+.wish-card{
+  background:white;border:4px solid var(--dark);border-radius:12px;
+  padding:16px;box-shadow:5px 5px 0 var(--dark);
+  margin-top:14px;display:none;
+}
+.wish-card p{font-weight:700;font-size:14px;line-height:1.6;color:var(--dark)}
+
+/* ============ PAGE 5: FINAL ============ */
+#page5 .sky-bg{background:linear-gradient(180deg,#0d0d2b 0%,#1a0a3a 50%,#2d0040 100%)}
+
+.final-scene{text-align:center;max-width:440px;width:100%;z-index:10}
+.final-photo-frame{
+  width:clamp(140px,36vw,200px);height:clamp(140px,36vw,200px);
+  border-radius:50%;border:6px solid var(--gold);
+  box-shadow:0 0 0 6px var(--dark),0 0 40px rgba(251,208,0,0.5);
+  object-fit:cover;margin:0 auto 20px;
+  display:block;
+  animation:finalPulse 3s ease-in-out infinite;
+}
+@keyframes finalPulse{0%,100%{box-shadow:0 0 0 6px var(--dark),0 0 30px rgba(251,208,0,0.4)}50%{box-shadow:0 0 0 6px var(--dark),0 0 60px rgba(251,208,0,0.8)}}
+
+.final-placeholder{
+  width:clamp(140px,36vw,200px);height:clamp(140px,36vw,200px);
+  border-radius:50%;border:6px solid var(--gold);background:rgba(255,255,255,0.1);
+  margin:0 auto 20px;display:flex;align-items:center;justify-content:center;
+  font-size:60px;animation:finalPulse 3s ease-in-out infinite;
+}
+
+.final-names{
+  font-family:'Press Start 2P',monospace;font-size:9px;color:var(--gold);
+  text-shadow:2px 2px 0 var(--dark);margin-bottom:16px;letter-spacing:2px;
+}
+.final-message-card{
+  background:rgba(255,255,255,0.95);
+  border:4px solid var(--gold);border-radius:16px;
+  padding:20px 24px;box-shadow:6px 6px 0 var(--dark);
+  margin-bottom:20px;
+  position:relative;
+}
+.final-message-card::before{
+  content:'💌';position:absolute;top:-18px;left:50%;transform:translateX(-50%);
+  font-size:28px;
+}
+.final-message-card p{
+  font-size:clamp(13px,3vw,15px);line-height:1.8;color:var(--dark);
+  font-weight:700;font-style:italic;
+}
+.final-from{
+  font-family:'Press Start 2P',monospace;font-size:7px;color:var(--red);
+  margin-top:12px;
+}
+
+.hearts-float{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:0}
+.heart-float{
+  position:absolute;font-size:20px;bottom:-30px;
+  animation:floatUp linear infinite;
+}
+@keyframes floatUp{
+  0%{transform:translateY(0) rotate(-10deg);opacity:0.8}
+  100%{transform:translateY(-100vh) rotate(15deg);opacity:0}
+}
+
+.stars-float{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:0}
+
+/* ============ NAVIGATION BUTTONS ============ */
+.nav-btn{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:14px 28px;border:4px solid var(--dark);border-radius:12px;
+  font-family:'Press Start 2P',monospace;font-size:10px;cursor:pointer;
+  box-shadow:5px 5px 0 var(--dark);
+  transition:transform 0.1s,box-shadow 0.1s;
+  text-decoration:none;position:relative;overflow:hidden;
+}
+.nav-btn:hover{transform:translateY(-3px);box-shadow:5px 8px 0 var(--dark)}
+.nav-btn:active{transform:translateY(2px);box-shadow:2px 2px 0 var(--dark)}
+.nav-btn::after{
+  content:'';position:absolute;inset:0;
+  background:rgba(255,255,255,0.2);
+  transform:translateX(-100%);transition:transform 0.3s;
+}
+.nav-btn:hover::after{transform:translateX(0)}
+.btn-next{background:var(--green);color:white}
+.btn-finish{background:var(--gold);color:var(--dark);animation:goldPulse 2s ease-in-out infinite}
+@keyframes goldPulse{0%,100%{box-shadow:5px 5px 0 var(--dark)}50%{box-shadow:5px 5px 0 var(--dark),0 0 25px rgba(251,208,0,0.6)}}
+
+/* CONFETTI */
+.confetti-piece{
+  position:fixed;width:10px;height:10px;
+  animation:confettiRain linear forwards;
+  pointer-events:none;z-index:200;
+}
+@keyframes confettiRain{
+  0%{transform:translateY(-20px) rotate(0deg);opacity:1}
+  100%{transform:translateY(100vh) rotate(720deg);opacity:0}
+}
+
+/* LOADING */
+#loading{
+  position:fixed;inset:0;z-index:300;
+  background:var(--red);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:20px;
+}
+#loading h1{font-family:'Press Start 2P',monospace;font-size:18px;color:var(--gold);text-shadow:3px 3px 0 var(--dark);text-align:center}
+#loading .sub{font-family:'Press Start 2P',monospace;font-size:8px;color:white;text-align:center}
+.loading-mario{font-size:60px;animation:loadBounce 0.5s ease-in-out infinite alternate}
+@keyframes loadBounce{from{transform:translateY(0)}to{transform:translateY(-20px)}}
+.progress-bar{width:240px;height:16px;background:rgba(0,0,0,0.3);border-radius:8px;border:3px solid var(--dark);overflow:hidden}
+.progress-fill{height:100%;background:var(--gold);border-radius:6px;animation:progress 1.8s ease-out forwards}
+@keyframes progress{from{width:0%}to{width:100%}}
+
+/* CLOUD floating */
+.cloud-f1{width:100px;height:34px;top:15%;left:5%;animation:cloudF 18s linear infinite}
+.cloud-f1::before{width:50px;height:50px;top:-28px;left:12px}
+.cloud-f1::after{width:36px;height:36px;top:-18px;left:44px}
+.cloud-f2{width:80px;height:28px;top:35%;left:70%;animation:cloudF 24s linear infinite;animation-delay:-8s}
+.cloud-f2::before{width:44px;height:44px;top:-24px;left:10px}
+.cloud-f2::after{width:30px;height:30px;top:-16px;left:38px}
+@keyframes cloudF{from{transform:translateX(-200px)}to{transform:translateX(120vw)}}
+
+@media(max-width:480px){
+  .balloons-row{gap:16px}
+  .balloon{width:70px;height:88px}
+}
+</style>
+</head>
+<body>
+
+<!-- LOADING SCREEN -->
+<div id="loading">
+  <div class="loading-mario">🍄</div>
+  <h1>MARIO<br/>LOVE</h1>
+  <div class="sub">Loading your surprise...</div>
+  <div class="progress-bar"><div class="progress-fill"></div></div>
+</div>
+
+<!-- ====== PAGE 1: PASSWORD ====== -->
+<div class="scene" id="page1">
+  <div class="sky-bg">
+    <!-- stars -->
+    <span class="stars-bg" id="stars1"></span>
+  </div>
+  <div class="top-bar">
+    <div class="logo">🍄 MarioLove</div>
+    <div class="watermark-badge" id="wm1">★ MARIOLOVE.IN ★</div>
+  </div>
+  <div class="scene-content">
+    <div class="pwd-card">
+      <div class="pwd-card-header">
+        <h1>🔐 SECRET ENTRY</h1>
+        <p id="p1ReceiverLabel">A surprise awaits you...</p>
+      </div>
+      <div class="couple-frame">
+        <div class="couple-placeholder" id="p1Placeholder">💑</div>
+        <img class="couple-img" id="p1Photo" alt="couple" style="display:none"/>
+        <div class="receiver-tag" id="p1ReceiverName">Hello there! 💕</div>
+      </div>
+      <div class="keypad-area">
+        <div class="pwd-input-display">
+          <div class="pwd-box" id="pb1"></div>
+          <div class="pwd-box" id="pb2"></div>
+          <div class="pwd-box" id="pb3"></div>
+          <div class="pwd-box" id="pb4"></div>
+        </div>
+        <div class="keypad">
+          <div class="key-btn" onclick="pressKey('1')">1</div>
+          <div class="key-btn" onclick="pressKey('2')">2</div>
+          <div class="key-btn" onclick="pressKey('3')">3</div>
+          <div class="key-btn" onclick="pressKey('4')">4</div>
+          <div class="key-btn" onclick="pressKey('5')">5</div>
+          <div class="key-btn" onclick="pressKey('6')">6</div>
+          <div class="key-btn" onclick="pressKey('7')">7</div>
+          <div class="key-btn" onclick="pressKey('8')">8</div>
+          <div class="key-btn" onclick="pressKey('9')">9</div>
+          <div class="key-btn special" onclick="pressKey('*')">★</div>
+          <div class="key-btn" onclick="pressKey('0')">0</div>
+          <div class="key-btn del" onclick="pressDelete()">⌫</div>
+        </div>
+        <div class="error-msg" id="pwdError"></div>
+      </div>
+    </div>
+  </div>
+  <div class="ground-f"></div>
+  <div class="mario-walk">🏃</div>
+</div>
+
+<!-- ====== PAGE 2: BOUQUET ====== -->
+<div class="scene hidden" id="page2">
+  <div class="sky-bg"></div>
+  <!-- falling petals -->
+  <div id="petalsContainer" style="position:absolute;inset:0;pointer-events:none;z-index:1;overflow:hidden"></div>
+  <div class="top-bar">
+    <div class="logo">🍄 MarioLove</div>
+    <div class="watermark-badge">★ MARIOLOVE.IN ★</div>
+  </div>
+  <div class="scene-content" style="z-index:5">
+    <div class="bouquet-scene">
+      <div class="bouquet-title">💐 A GARDEN OF LOVE 💐</div>
+      <div class="bouquet-img-wrap">
+        <span class="bouquet-emoji-big" id="mainBouquet" onclick="bouquetClick()">💐</span>
+      </div>
+      <div class="flower-ring">🌸 🌺 🌼 🌹 🌷 🌻</div>
+      <div class="love-msg-card">
+        <p id="bouquetMsg">Every flower in this bouquet holds a wish for you... just like every day, you make the world more beautiful. 🌹</p>
+        <div class="from" id="bouquetFrom">— With Love 💕</div>
+      </div>
+      <button class="nav-btn btn-next" onclick="goTo(3)">NEXT ›› 🎈</button>
+    </div>
+  </div>
+  <div class="ground-f"></div>
+  <div class="mario-walk" style="animation-delay:-3s">🏃</div>
+  <div class="cloud-f cloud-f1"></div>
+  <div class="cloud-f cloud-f2"></div>
+</div>
+
+<!-- ====== PAGE 3: BALLOONS ====== -->
+<div class="scene hidden" id="page3">
+  <div class="sky-bg"></div>
+  <div class="top-bar">
+    <div class="logo">🍄 MarioLove</div>
+    <div class="watermark-badge">★ MARIOLOVE.IN ★</div>
+  </div>
+  <div class="scene-content">
+    <div class="balloons-scene">
+      <div class="balloons-title">🎈 POP THE BALLOONS! 🎈</div>
+      <div style="font-size:11px;color:#444;margin-bottom:16px;font-weight:700">Each one holds a little surprise for you 💕</div>
+      <div class="balloons-row">
+        <div class="balloon-wrap" onclick="popBalloon(0)">
+          <div class="balloon balloon-1" id="balloon0"></div>
+        </div>
+        <div class="balloon-wrap" onclick="popBalloon(1)">
+          <div class="balloon balloon-2" id="balloon1"></div>
+        </div>
+        <div class="balloon-wrap" onclick="popBalloon(2)">
+          <div class="balloon balloon-3" id="balloon2"></div>
+        </div>
+      </div>
+      <div style="font-size:12px;color:#555;font-weight:600" id="balloonsLeft">Pop all 3 to continue! 🎉</div>
+      <div style="margin-top:16px">
+        <button class="nav-btn btn-next" id="balloonNextBtn" style="display:none" onclick="goTo(4)">NEXT ›› 🎂</button>
+      </div>
+    </div>
+  </div>
+  <!-- POLAROID OVERLAY -->
+  <div class="polaroid-overlay" id="polaroidOverlay">
+    <div class="polaroid">
+      <div class="close-pol" onclick="closePolaroid()">✕</div>
+      <img id="polaroidGif" src="" alt="surprise gif"/>
+      <div class="message" id="polaroidMsg">You are so loved!</div>
+      <div class="stamp" id="polaroidStamp">★ MARIOLOVE ★</div>
+    </div>
+  </div>
+  <div class="ground-f"></div>
+  <div class="mario-walk" style="animation-delay:-6s">🏃</div>
+  <div class="cloud-f cloud-f1"></div>
+  <div class="cloud-f cloud-f2"></div>
+</div>
+
+<!-- ====== PAGE 4: CAKE ====== -->
+<div class="scene hidden" id="page4">
+  <div class="sky-bg"></div>
+  <div id="fireworks" class="fireworks"></div>
+  <div class="top-bar">
+    <div class="logo">🍄 MarioLove</div>
+    <div class="watermark-badge">★ MARIOLOVE.IN ★</div>
+  </div>
+  <div class="scene-content">
+    <div class="cake-scene">
+      <div class="cake-title">🎂 MAKE A SECRET WISH! 🎂</div>
+      <div class="cake-wrap">
+        <span class="cake-emoji" id="cakeEmoji">🎂</span>
+      </div>
+      <button class="blow-btn" id="blowBtn" onclick="blowCandle()">💨 BLOW & WISH!</button>
+      <div class="wish-input-wrap" id="wishInputWrap">
+        <input class="wish-input" id="wishText" placeholder="Type your secret wish...✨" maxlength="120"/>
+        <button class="wish-submit" onclick="submitWish()">✨ LOCK IN MY WISH ✨</button>
+      </div>
+      <div class="wish-card" id="wishCard">
+        <p id="wishDisplay">Your wish has been sent to the universe! 🌟</p>
+      </div>
+      <div style="margin-top:18px">
+        <button class="nav-btn btn-next" id="cakeNextBtn" style="display:none" onclick="goTo(5)">NEXT ›› 💌</button>
+      </div>
+    </div>
+  </div>
+  <div class="ground-f"></div>
+  <div class="mario-walk" style="animation-delay:-9s">🏃</div>
+</div>
+
+<!-- ====== PAGE 5: FINAL MESSAGE ====== -->
+<div class="scene hidden" id="page5">
+  <div class="sky-bg"></div>
+  <div class="hearts-float" id="heartsFloat"></div>
+  <div class="top-bar">
+    <div class="logo">🍄 MarioLove</div>
+    <div class="watermark-badge">★ MARIOLOVE.IN ★</div>
+  </div>
+  <div class="scene-content">
+    <div class="final-scene">
+      <div style="font-size:28px;margin-bottom:12px;animation:balloonBob 3s ease-in-out infinite">💕 🌟 💕</div>
+      <div class="final-placeholder" id="finalPlaceholder">💑</div>
+      <img class="final-photo-frame" id="finalPhoto" alt="couple" style="display:none"/>
+      <div class="final-names" id="finalNames">ALWAYS & FOREVER</div>
+      <div class="final-message-card">
+        <p id="finalMsgText">Loading your message...</p>
+        <div class="final-from" id="finalFrom">— With Love 💕</div>
+      </div>
+      <button class="nav-btn btn-finish" onclick="celebrate()">🌟 CELEBRATE! 🌟</button>
+    </div>
+  </div>
+  <div class="ground-f"></div>
+  <div class="mario-walk" style="animation-delay:-12s">🏃</div>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://iliakhaufgpjjtwamisn.supabase.co';
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlsaWFraGF1Zmdwamp0d2FtaXNuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA4NTU0NTMsImV4cCI6MjA5NjQzMTQ1M30.nim8jt-cUhb3IIWjnd0FC3NF6xS_gg8RelBBJG1bIno';
+
+let data = {};
+let currentPwd = '';
+let balloonsPopped = 0;
+let cakeBlown = false;
+let currentPage = 1;
+
+// ---- BALLOON GIFS & MESSAGES ----
+const balloonSurprises = [
+  {
+    gif: 'https://media.giphy.com/media/l0MYAs5E2oIDCq9So/giphy.gif',
+    msg: 'You make every day feel like a celebration! 🎉 I am so lucky to have you in my life.'
+  },
+  {
+    gif: 'https://media.giphy.com/media/26FLdaDQ5f72FPbEI/giphy.gif',
+    msg: 'You are my favourite adventure and my safest home. Always. 💕'
+  },
+  {
+    gif: 'https://media.giphy.com/media/3oEdv9Y9MDfNO5pV8Y/giphy.gif',
+    msg: 'Loving you is the best thing I ever did. ✨ Thank you for being YOU.'
+  }
+];
+
+// ---- LOAD DATA ----
+async function loadData(){
+  const params = new URLSearchParams(location.search);
+  const id = params.get('id');
+  if(!id){document.getElementById('loading').style.display='none';showPage(1);return;}
+  try{
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/mariolove?id=eq.${id}&select=*`,{
+      headers:{'apikey':SUPABASE_ANON,'Authorization':`Bearer ${SUPABASE_ANON}`}
+    });
+    const rows = await res.json();
+    if(rows && rows.length > 0){
+      data = rows[0];
+      applyData();
+    }
+  }catch(e){console.error(e)}
+  setTimeout(()=>{
+    document.getElementById('loading').style.display='none';
+    showPage(1);
+  },2000);
+}
+
+function applyData(){
+  if(data.receiver){
+    document.getElementById('p1ReceiverLabel').textContent = `Hey ${data.receiver}! A surprise awaits... 💕`;
+    document.getElementById('p1ReceiverName').textContent = `For: ${data.receiver} 💕`;
+  }
+  if(data.photo_url){
+    document.getElementById('p1Photo').src = data.photo_url;
+    document.getElementById('p1Photo').style.display = 'block';
+    document.getElementById('p1Placeholder').style.display = 'none';
+    document.getElementById('finalPhoto').src = data.photo_url;
+    document.getElementById('finalPhoto').style.display = 'block';
+    document.getElementById('finalPlaceholder').style.display = 'none';
+  }
+  if(data.sender && data.receiver){
+    document.getElementById('finalNames').textContent = `${data.sender} ♥ ${data.receiver}`;
+    document.getElementById('bouquetFrom').textContent = `— From ${data.sender} with all my love 💕`;
+    document.getElementById('finalFrom').textContent = `— Always yours, ${data.sender} 💕`;
+  }
+  if(data.message){
+    document.getElementById('finalMsgText').textContent = data.message;
+  }
+}
+
+// ---- PAGE NAVIGATION ----
+function showPage(n){
+  document.querySelectorAll('.scene').forEach(s=>s.classList.add('hidden'));
+  document.getElementById('page'+n).classList.remove('hidden');
+  currentPage = n;
+  if(n===2) initPetals();
+  if(n===5) initHearts();
+}
+function goTo(n){showPage(n)}
+
+// ---- PAGE 1: PASSWORD ----
+function pressKey(k){
+  if(currentPwd.length >= 4) return;
+  currentPwd += k;
+  updatePwdDisplay();
+  if(currentPwd.length === 4) setTimeout(checkPassword, 300);
+}
+function pressDelete(){
+  currentPwd = currentPwd.slice(0,-1);
+  updatePwdDisplay();
+  document.getElementById('pwdError').textContent='';
+}
+function updatePwdDisplay(){
+  ['pb1','pb2','pb3','pb4'].forEach((id,i)=>{
+    const box = document.getElementById(id);
+    box.className = 'pwd-box' + (currentPwd.length > i ? ' filled' : '');
+    if(currentPwd.length > i) box.innerHTML = '<span style="display:none">★</span>';
+    else box.innerHTML='';
+  });
+  // update filled class properly
+  [1,2,3,4].forEach(i=>{
+    const b = document.getElementById('pb'+i);
+    if(currentPwd.length >= i){
+      b.classList.add('filled');
+    } else {
+      b.classList.remove('filled');
+    }
+  });
+}
+function checkPassword(){
+  const correctPwd = data.password || '0000';
+  if(currentPwd === correctPwd){
+    spawnConfetti();
+    setTimeout(()=>goTo(2), 600);
+  } else {
+    document.getElementById('pwdError').textContent = '❌ Wrong password! Try again.';
+    ['pb1','pb2','pb3','pb4'].forEach(id=>document.getElementById(id).classList.add('shake'));
+    setTimeout(()=>{
+      ['pb1','pb2','pb3','pb4'].forEach(id=>document.getElementById(id).classList.remove('shake'));
+      currentPwd=''; updatePwdDisplay();
+      document.getElementById('pwdError').textContent='';
+    },1000);
+  }
+}
+
+// ---- PAGE 2: BOUQUET ----
+function initPetals(){
+  const c = document.getElementById('petalsContainer');
+  c.innerHTML='';
+  const petals=['🌸','🌺','🌼','🌷','🌹','💐'];
+  for(let i=0;i<18;i++){
+    const p = document.createElement('div');
+    p.className='petal';
+    p.textContent=petals[Math.floor(Math.random()*petals.length)];
+    p.style.left = Math.random()*100+'%';
+    p.style.animationDuration = (3+Math.random()*5)+'s';
+    p.style.animationDelay = (Math.random()*5)+'s';
+    p.style.fontSize = (14+Math.random()*14)+'px';
+    c.appendChild(p);
+  }
+}
+function bouquetClick(){
+  document.getElementById('mainBouquet').style.transform='scale(1.3) rotate(10deg)';
+  setTimeout(()=>document.getElementById('mainBouquet').style.transform='',400);
+}
+
+// ---- PAGE 3: BALLOONS ----
+function popBalloon(i){
+  if(document.getElementById('balloon'+i).classList.contains('popped')) return;
+  document.getElementById('balloon'+i).classList.add('popped');
+  const s = balloonSurprises[i];
+  document.getElementById('polaroidGif').src = s.gif;
+  document.getElementById('polaroidMsg').textContent = s.msg;
+  document.getElementById('polaroidOverlay').classList.add('open');
+  balloonsPopped++;
+  if(balloonsPopped>=3){
+    setTimeout(()=>{
+      document.getElementById('balloonsLeft').textContent='🎉 All balloons popped! You found all the surprises!';
+      document.getElementById('balloonNextBtn').style.display='inline-flex';
+    },500);
+  }
+}
+function closePolaroid(){document.getElementById('polaroidOverlay').classList.remove('open')}
+
+// ---- PAGE 4: CAKE ----
+function blowCandle(){
+  document.getElementById('cakeEmoji').textContent='✨🎂✨';
+  document.getElementById('blowBtn').style.display='none';
+  spawnFireworks();
+  document.getElementById('wishInputWrap').style.display='block';
+}
+function submitWish(){
+  const wish = document.getElementById('wishText').value.trim();
+  if(!wish){return}
+  document.getElementById('wishDisplay').textContent = `"${wish}" — Sent to the universe! 🌠`;
+  document.getElementById('wishCard').style.display='block';
+  document.getElementById('wishInputWrap').style.display='none';
+  spawnFireworks();
+  document.getElementById('cakeNextBtn').style.display='inline-flex';
+}
+function spawnFireworks(){
+  const colors=['#E52521','#FBD000','#049CD8','#43B047','#FF6B9D','#ffffff'];
+  const fw = document.getElementById('fireworks');
+  for(let i=0;i<30;i++){
+    const s = document.createElement('div');
+    s.className='spark';
+    s.style.background=colors[Math.floor(Math.random()*colors.length)];
+    s.style.left='50%'; s.style.top='45%';
+    const angle=Math.random()*360;
+    const dist=80+Math.random()*140;
+    s.style.setProperty('--dx',Math.cos(angle*Math.PI/180)*dist+'px');
+    s.style.setProperty('--dy',Math.sin(angle*Math.PI/180)*dist+'px');
+    s.style.animationDuration=(0.8+Math.random()*0.8)+'s';
+    s.style.animationDelay=(Math.random()*0.3)+'s';
+    fw.appendChild(s);
+    setTimeout(()=>s.remove(),2000);
+  }
+}
+
+// ---- PAGE 5: FINAL ----
+function initHearts(){
+  const c = document.getElementById('heartsFloat');
+  c.innerHTML='';
+  const h=['💕','❤️','💖','💗','💝','🌟','✨','💫'];
+  for(let i=0;i<20;i++){
+    const el=document.createElement('div');
+    el.className='heart-float';
+    el.textContent=h[Math.floor(Math.random()*h.length)];
+    el.style.left=Math.random()*100+'%';
+    el.style.animationDuration=(4+Math.random()*6)+'s';
+    el.style.animationDelay=(Math.random()*6)+'s';
+    el.style.fontSize=(14+Math.random()*16)+'px';
+    c.appendChild(el);
+  }
+}
+function celebrate(){spawnConfetti();spawnFireworks()}
+
+// ---- SHARED: CONFETTI ----
+function spawnConfetti(){
+  const colors=['#E52521','#FBD000','#049CD8','#43B047','#FF6B9D','#ffffff','#9B59B6'];
+  for(let i=0;i<60;i++){
+    const c=document.createElement('div');
+    c.className='confetti-piece';
+    c.style.left=Math.random()*100+'%';
+    c.style.top='-20px';
+    c.style.background=colors[Math.floor(Math.random()*colors.length)];
+    c.style.width=(6+Math.random()*10)+'px';
+    c.style.height=(6+Math.random()*10)+'px';
+    c.style.borderRadius=Math.random()>0.5?'50%':'2px';
+    c.style.animationDuration=(1.5+Math.random()*2)+'s';
+    c.style.animationDelay=(Math.random()*0.8)+'s';
+    document.body.appendChild(c);
+    setTimeout(()=>c.remove(),4000);
+  }
+}
+
+
+// ---- STARS BACKGROUND ----
+function createStars(){
+  const c=document.getElementById('stars1');
+  if(!c) return;
+  for(let i=0;i<40;i++){
+    const s=document.createElement('span');
+    s.style.cssText=`width:${2+Math.random()*4}px;height:${2+Math.random()*4}px;left:${Math.random()*100}%;top:${Math.random()*100}%;animation-delay:${Math.random()*3}s`;
+    c.appendChild(s);
+  }
+}
+
+// ---- INIT ----
+createStars();
+loadData();
+</script>
+</body>
+</html>
