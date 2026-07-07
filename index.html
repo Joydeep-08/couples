@@ -528,7 +528,7 @@ for(let i=0;i<16;i++){
   <div class="reveal" id="balloonReveal">
     <h1 style="font-size:clamp(28px,5vw,44px)"><span class="heart-accent">💖</span>Please be mine<span class="heart-accent">💖</span></h1>
     <div class="gif-slot final-gif-slot" id="gifSlot1">
-      <img src="https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExM2RxajVyODJsdzA2d29hNjRpeDhyZnh5YnYybGRwaHVxaDVjbWdseSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/l2QDYGQQKKNGq6mhq/giphy.gif" alt="cute heart gif" loading="lazy">
+      <img src="https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExZDlhN2g2N3lqaWp0Ym1pNDY4aG1uY2Y3cjZobHVwNjVzbnY2Y2VhMSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/ytu2GUYbvhz7zShGwS/giphy.gif" alt="cute heart gif" loading="lazy">
     </div>
     <button class="btn continue-btn" id="toFinalBtn">Continue</button>
   </div>
@@ -571,7 +571,7 @@ for(let i=0;i<16;i++){
   <p class="sub">Consider this Yes notarized.</p>
 
   <div class="gif-slot final-gif-slot" id="gifSlot2">
-    <img src="https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExM2RxajVyODJsdzA2d29hNjRpeDhyZnh5YnYybGRwaHVxaDVjbWdseSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/l2QDYGQQKKNGq6mhq/giphy.gif" alt="cute heart gif" loading="lazy">
+    <img src="https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExZDlhN2g2N3lqaWp0Ym1pNDY4aG1uY2Y3cjZobHVwNjVzbnY2Y2VhMSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/ytu2GUYbvhz7zShGwS/giphy.gif" alt="cute heart gif" loading="lazy">
   </div>
   <div class="fine" id="fromNameLine" style="display:none; font-style:italic; margin-top:6px;"></div>
 
@@ -709,43 +709,26 @@ document.getElementById('couponInput').addEventListener('keydown', (e)=>{
 });
 
 /* ---------- RECIPIENT-LINK MODE ---------- */
-/* No backend, so the recipient link can't "look up" anything on a server —
-   there's nowhere for it to look. Instead, the question + sender name are
-   packed directly into the URL itself (base64 of a small JSON blob) under
-   a `?d=` param. The link IS the data. Opening it just decodes that param
-   client-side and jumps straight into the yes/no + balloon + reveal flow
-   (no watermark, no payment, no form). This works on any static host —
-   Cloudflare Pages, GitHub Pages, wherever — because nothing needs to be
-   "stored" anywhere. */
-
-function encodePayload(obj){
-  // encodeURIComponent first so non-ASCII (emoji, accents, etc.) survive btoa
-  return btoa(encodeURIComponent(JSON.stringify(obj)))
-    .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); // URL-safe
-}
-
-function decodePayload(str){
-  let b64 = str.replace(/-/g, '+').replace(/_/g, '/');
-  while(b64.length % 4) b64 += '=';
-  return JSON.parse(decodeURIComponent(atob(b64)));
-}
-
+/* If this page was opened with ?id=..., it's the unique link sent to the
+   other person: load the sender's question, skip straight into the same
+   yes/no + balloon + reveal experience (no watermark, no payment, no form). */
 const urlParams = new URLSearchParams(window.location.search);
-const recipientPayload = urlParams.get('d') || urlParams.get('id'); // 'id' kept for backwards compat with any already-sent old links
-const isRecipientMode = !!recipientPayload;
+const recipientId = urlParams.get('id');
+const isRecipientMode = !!recipientId;
 
-function initRecipientMode(){
+async function initRecipientMode(){
   let data = null;
   try{
-    data = decodePayload(recipientPayload);
+    const result = await window.storage.get('proposal-link:' + recipientId, true);
+    data = (result && result.value) ? JSON.parse(result.value) : null;
   }catch(err){
-    data = null; // malformed / tampered / old-format link
+    data = null; // key not found, or storage unavailable
   }
 
-  if(data && data.q){
+  if(data){
     isRecipient = true;
-    customQuestion = data.q;
-    fromName = data.n || '';
+    customQuestion = data.question || 'Will you be mine?';
+    fromName = data.fromName || '';
     applyQuestionToDOM();
     goTo('stage1');
   } else {
@@ -755,6 +738,7 @@ function initRecipientMode(){
 
 if(isRecipientMode){
   document.documentElement.classList.add('recipient-mode');
+  // hide every stage immediately so stage0 never flashes while we check storage
   document.querySelectorAll('.stage').forEach(s=>s.classList.remove('active'));
   initRecipientMode();
 }
@@ -884,10 +868,22 @@ document.getElementById('toFinalBtn').addEventListener('click', ()=>{
 });
 
 /* ---------- generate the unique recipient link after a successful "Yes" payment ---------- */
-function unlockShareableLink(){
-  const payload = encodePayload({ q: customQuestion, n: fromName });
-  const shareUrl = window.location.origin + window.location.pathname + '?d=' + payload;
+async function unlockShareableLink(){
+  const id = (window.crypto && crypto.randomUUID)
+    ? crypto.randomUUID()
+    : 'id-' + Date.now() + '-' + Math.random().toString(36).slice(2);
 
+  try{
+    await window.storage.set('proposal-link:' + id, JSON.stringify({
+      question: customQuestion,
+      fromName: fromName,
+      created: Date.now()
+    }), true);
+  }catch(err){
+    console.error('Could not save the shareable link — storage unavailable.', err);
+  }
+
+  const shareUrl = window.location.origin + window.location.pathname + '?id=' + id;
   const linkInput = document.getElementById('shareLinkInput');
   const shareBox = document.getElementById('shareBox');
   if(linkInput && shareBox){
