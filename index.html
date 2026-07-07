@@ -709,26 +709,43 @@ document.getElementById('couponInput').addEventListener('keydown', (e)=>{
 });
 
 /* ---------- RECIPIENT-LINK MODE ---------- */
-/* If this page was opened with ?id=..., it's the unique link sent to the
-   other person: load the sender's question, skip straight into the same
-   yes/no + balloon + reveal experience (no watermark, no payment, no form). */
-const urlParams = new URLSearchParams(window.location.search);
-const recipientId = urlParams.get('id');
-const isRecipientMode = !!recipientId;
+/* No backend, so the recipient link can't "look up" anything on a server —
+   there's nowhere for it to look. Instead, the question + sender name are
+   packed directly into the URL itself (base64 of a small JSON blob) under
+   a `?d=` param. The link IS the data. Opening it just decodes that param
+   client-side and jumps straight into the yes/no + balloon + reveal flow
+   (no watermark, no payment, no form). This works on any static host —
+   Cloudflare Pages, GitHub Pages, wherever — because nothing needs to be
+   "stored" anywhere. */
 
-async function initRecipientMode(){
+function encodePayload(obj){
+  // encodeURIComponent first so non-ASCII (emoji, accents, etc.) survive btoa
+  return btoa(encodeURIComponent(JSON.stringify(obj)))
+    .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); // URL-safe
+}
+
+function decodePayload(str){
+  let b64 = str.replace(/-/g, '+').replace(/_/g, '/');
+  while(b64.length % 4) b64 += '=';
+  return JSON.parse(decodeURIComponent(atob(b64)));
+}
+
+const urlParams = new URLSearchParams(window.location.search);
+const recipientPayload = urlParams.get('d') || urlParams.get('id'); // 'id' kept for backwards compat with any already-sent old links
+const isRecipientMode = !!recipientPayload;
+
+function initRecipientMode(){
   let data = null;
   try{
-    const result = await window.storage.get('proposal-link:' + recipientId, true);
-    data = (result && result.value) ? JSON.parse(result.value) : null;
+    data = decodePayload(recipientPayload);
   }catch(err){
-    data = null; // key not found, or storage unavailable
+    data = null; // malformed / tampered / old-format link
   }
 
-  if(data){
+  if(data && data.q){
     isRecipient = true;
-    customQuestion = data.question || 'Will you be mine?';
-    fromName = data.fromName || '';
+    customQuestion = data.q;
+    fromName = data.n || '';
     applyQuestionToDOM();
     goTo('stage1');
   } else {
@@ -738,7 +755,6 @@ async function initRecipientMode(){
 
 if(isRecipientMode){
   document.documentElement.classList.add('recipient-mode');
-  // hide every stage immediately so stage0 never flashes while we check storage
   document.querySelectorAll('.stage').forEach(s=>s.classList.remove('active'));
   initRecipientMode();
 }
@@ -868,22 +884,10 @@ document.getElementById('toFinalBtn').addEventListener('click', ()=>{
 });
 
 /* ---------- generate the unique recipient link after a successful "Yes" payment ---------- */
-async function unlockShareableLink(){
-  const id = (window.crypto && crypto.randomUUID)
-    ? crypto.randomUUID()
-    : 'id-' + Date.now() + '-' + Math.random().toString(36).slice(2);
+function unlockShareableLink(){
+  const payload = encodePayload({ q: customQuestion, n: fromName });
+  const shareUrl = window.location.origin + window.location.pathname + '?d=' + payload;
 
-  try{
-    await window.storage.set('proposal-link:' + id, JSON.stringify({
-      question: customQuestion,
-      fromName: fromName,
-      created: Date.now()
-    }), true);
-  }catch(err){
-    console.error('Could not save the shareable link — storage unavailable.', err);
-  }
-
-  const shareUrl = window.location.origin + window.location.pathname + '?id=' + id;
   const linkInput = document.getElementById('shareLinkInput');
   const shareBox = document.getElementById('shareBox');
   if(linkInput && shareBox){
